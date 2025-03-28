@@ -1,0 +1,83 @@
+#include <WiFi.h>
+#include <HTTPClient.h>
+#include <ArduinoJson.h>//このライブラリは開発環境に追加してください！
+
+const char* ssid = "Wi-Fi SSID";  // Wi-Fi SSID
+const char* password = "Wifiパスワード";   // Wi-Fi パスワード
+
+const char* openai_api_url = "https://api.openai.com/v1/chat/completions"; // OpenAI APIのURL
+const char* openai_api_key = "OpenAI APIキー"; // OpenAI APIキーを設定（本物のキーに置き換える）
+
+void setup() {
+  Serial.begin(115200);
+  delay(4000); // シリアルモニタの準備待ち
+
+  Serial.printf("Wi-Fiに接続中: %s\n", ssid);
+  WiFi.begin(ssid, password);
+
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+
+  Serial.println("\nWi-Fiに接続完了");
+  Serial.print("IPアドレス: ");
+  Serial.println(WiFi.localIP());
+
+  sendOpenAIRequest(); // OpenAI APIを呼び出す
+}
+
+void sendOpenAIRequest() {
+  if (WiFi.status() == WL_CONNECTED) {
+    HTTPClient http;
+    http.begin(openai_api_url);
+    http.addHeader("Content-Type", "application/json");
+    http.addHeader("Authorization", String("Bearer ") + openai_api_key);
+
+    // JSONの作成
+    StaticJsonDocument<512> jsonDoc;
+    jsonDoc["model"] = "gpt-4o";
+    
+    JsonArray messages = jsonDoc.createNestedArray("messages");
+    
+    JsonObject systemMessage = messages.createNestedObject();
+    systemMessage["role"] = "system";
+    systemMessage["content"] = "You are a helpful assistant.";
+
+    JsonObject userMessage = messages.createNestedObject();
+    userMessage["role"] = "user";
+    userMessage["content"] = "who is your mother!";
+
+    String jsonData;
+    serializeJson(jsonDoc, jsonData);
+
+    Serial.println("送信するデータ:");
+    Serial.println(jsonData);
+
+    int httpResponseCode = http.POST(jsonData);
+
+    if (httpResponseCode > 0) {
+      String response = http.getString();
+      Serial.println("レスポンス:");
+      Serial.println(response);
+    } else {
+      Serial.printf("リクエストに失敗: %s\n", http.errorToString(httpResponseCode).c_str());
+    }
+
+    http.end();
+  } else {
+    Serial.println("Wi-Fiが切断されています。再接続を試みます...");
+    WiFi.begin(ssid, password);
+    while (WiFi.status() != WL_CONNECTED) {
+      delay(500);
+      Serial.print(".");
+    }
+    Serial.println("\n再接続完了");
+  }
+}
+
+void loop() {
+  // 60秒ごとにリクエストを送信
+  delay(60000);
+  sendOpenAIRequest();
+}
