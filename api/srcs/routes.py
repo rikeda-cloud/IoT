@@ -1,6 +1,7 @@
 from flask import request, jsonify
 from app import app, db
 from app.models import IoTData
+from app.utils.fetch_open_ai import fetch_open_ai
 
 
 # INFO IoTデバイスのIDは仮の値を用いる
@@ -32,7 +33,7 @@ def add_iot_data():
 
 
 @app.route("/api/iot-data", methods=["GET"])
-def get_iot_data():
+def list_iot_data():
     """指定したデバイスIDに関連するすべてのデータを取得"""
     try:
         # DEVICE_IDに関連するすべてのデータを取得
@@ -54,5 +55,28 @@ def get_iot_data():
 
         return jsonify(result), 200
 
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/order/assigned", methods=["POST"])
+def handle_order_assigned():
+    """
+    menuServiceから叩かれる
+    商品名情報を含んだリクエストを処理
+    """
+    data = request.get_json()
+    menus = data.get("menus")
+
+    if not menus:
+        return jsonify({"error": "Missing 'menus' in the request"}), 400
+
+    try:
+        prompt_system = "あなたは食品のデリバリーの専門家です。"
+        prompt_user = "デリバリーバッグに最適な温度と湿度を教えてください。"
+        prompt_user += 'メッセージの形式は{"temperature": 12.34, "humidity": 12.34}のようなJSON形式でお願いします。'
+        prompt_user += f"メニューは、{menus}です。"
+        res_data = fetch_open_ai(prompt_system, prompt_user)
+        return jsonify({"message": res_data["choices"][0]["message"]["content"]}), 201
     except Exception as e:
         return jsonify({"error": str(e)}), 500
