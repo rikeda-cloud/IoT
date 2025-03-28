@@ -1,0 +1,8 @@
+services:
+  flask-api:
+    build: .
+    image: flask-api:latest
+    command: gunicorn -w 1 -b 0.0.0.0:8080 app.main:app
+    ports:
+      - "8080:8080"
+    restart: always
