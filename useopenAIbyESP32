@@ -1,12 +1,12 @@
 #include <WiFi.h>
 #include <HTTPClient.h>
-#include <ArduinoJson.h>//このライブラリは開発環境に追加してください！
+#include <ArduinoJson.h>//これをらいぶらりについか？してください
 
-const char* ssid = "Wi-Fi SSID";  // Wi-Fi SSID
-const char* password = "Wifiパスワード";   // Wi-Fi パスワード
+const char* ssid = "WIFISSID";  // Wi-Fi SSID
+const char* password = "WIFIパスワード";   // Wi-Fi パスワード
 
 const char* openai_api_url = "https://api.openai.com/v1/chat/completions"; // OpenAI APIのURL
-const char* openai_api_key = "OpenAI APIキー"; // OpenAI APIキーを設定（本物のキーに置き換える）
+const char* openai_api_key = "APIキー"; // OpenAI APIキーを設定（本物のキーに置き換える）
 
 void setup() {
   Serial.begin(115200);
@@ -46,7 +46,7 @@ void sendOpenAIRequest() {
 
     JsonObject userMessage = messages.createNestedObject();
     userMessage["role"] = "user";
-    userMessage["content"] = "who is your mother!";
+    userMessage["content"] = "柏木由紀の生年月日はなんですか？1xxx,xx,xxの形式で出力してください。「1xxx,xx,xx」とだけ出力してください。この際カギかっこはいりません";
 
     String jsonData;
     serializeJson(jsonDoc, jsonData);
@@ -60,6 +60,22 @@ void sendOpenAIRequest() {
       String response = http.getString();
       Serial.println("レスポンス:");
       Serial.println(response);
+
+
+    //追加部分始まりjsonのパース
+    // レスポンスをJSONとして解析
+      StaticJsonDocument<512> responseDoc;
+      DeserializationError error = deserializeJson(responseDoc, response);
+
+      if (!error) {
+        // assistantのcontentを取得
+        const char* assistantContent = responseDoc["choices"][0]["message"]["content"];
+        Serial.println("\n💬 Assistantの返答:");
+        Serial.println(assistantContent);
+      } else {
+        Serial.println("JSON解析エラー");
+      }
+    //追加部分終わり
     } else {
       Serial.printf("リクエストに失敗: %s\n", http.errorToString(httpResponseCode).c_str());
     }
