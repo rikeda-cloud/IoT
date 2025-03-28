@@ -1,0 +1,84 @@
+#include <Adafruit_AHTX0.h>
+#include <Wire.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+
+Adafruit_AHTX0 aht;
+#define SCL_PIN 18
+#define SDA_PIN 21
+
+// 温度、湿度、2つの文字列を含む構造体
+typedef struct {
+    float temperature;   // 温度
+    float humidity;      // 湿度
+    char text1[50];      // 1つ目の文字列（最大50文字）
+    char text2[50];      // 2つ目の文字列（最大50文字）
+} SensorData;
+
+
+void setup() {
+  Serial.begin(115200);
+  delay(4000); // シリアルモニタの準備待ち
+  Wire.begin(SDA_PIN, SCL_PIN);
+
+  Serial.println("I²C 初期化完了");
+  if (!aht.begin()) {
+    Serial.println("AHT21の初期化に失敗しました！");
+    while (1); // 初期化失敗時は無限ループ
+  }
+  Serial.println("AHT21の初期化完了");
+}
+
+void get_datas(SensorData *datas)
+{
+  sensors_event_t humidity, temp;
+  
+  aht.getEvent(&humidity, &temp); // AHT21から湿度と温度の取得
+
+  //test温度と湿度をシリアルモニタに出力
+  // Serial.print("温度: ");
+  // Serial.print(temp.temperature);
+  // Serial.print(" °C, 湿度: ");
+  // Serial.print(humidity.relative_humidity);
+  // Serial.println(" %");
+
+  // 温度と湿度を構造体に入れる。
+  datas->temperature = temp.temperature;
+  datas->humidity = humidity.relative_humidity;
+
+  // printf("datas.temperature:%f\n", datas->temperature);
+  // printf("datas.humidity:%f\n", datas->humidity);
+  // printf("datas.temperature:%d\n", (int)round(datas->temperature));
+  // printf("datas.humidity:%d\n", (int)round(datas->humidity));
+  //test
+}
+
+void format_datas(SensorData *datas)
+{
+  sprintf(datas->text1, "temp:%dc", (int)round(datas->temperature));
+  sprintf(datas->text2, "hmd:%d%%", (int)round(datas->humidity));
+  //小数点を丸めて数字を文章化しでtext1,text2に格納
+  // printf("format_datas_test:%s\n", datas->text1);
+  // printf("format_datas_test:%s\n", datas->text2);
+  //test
+
+
+}
+
+void loop() {
+
+
+  SensorData *datas = (SensorData *)malloc(sizeof(SensorData)); // メモリ確保
+    if (datas == NULL) {
+        Serial.println("メモリ確保失敗");
+        return;
+    };
+
+  get_datas(datas);
+
+  format_datas(datas);
+  free(datas);
+  delay(10000); // 1秒待機
+}
+
