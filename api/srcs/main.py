@@ -1,13 +1,4 @@
-from flask import Flask, jsonify
-
-app = Flask(__name__, static_folder="static")
-
-
-# APIエンドポイント
-@app.route("/api/hello")
-def hello():
-    return jsonify({"message": "Hello, World!"})
-
+from app import app
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8080, debug=True)
+    app.run(debug=True)
