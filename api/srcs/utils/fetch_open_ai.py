@@ -3,7 +3,7 @@ import os
 import json
 
 
-def fetch_open_ai():
+def fetch_open_ai(prompt_system: str, prompt_user: str):
     # API キーを環境変数から取得
     api_key = os.getenv("OPENAI_API_KEY")
     url = "https://api.openai.com/v1/chat/completions"
@@ -13,8 +13,8 @@ def fetch_open_ai():
     data = {
         "model": "gpt-4o",
         "messages": [
-            {"role": "developer", "content": "You are a helpful assistant."},
-            {"role": "user", "content": "Hello!"},
+            {"role": "developer", "content": prompt_system},
+            {"role": "user", "content": prompt_user},
         ],
     }
 
