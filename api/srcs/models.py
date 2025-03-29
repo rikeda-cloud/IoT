@@ -14,3 +14,13 @@ class IoTData(db.Model):
 
     def __repr__(self):
         return f"<DeviceData device_id={self.device_id} temperature={self.temperature} humidity={self.humidity} timestamp={self.timestamp}>"
+
+
+class OrderData(db.Model):
+    __tablename__ = "order_data"
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    menus = db.Column(db.String(1024))
+    ideal_temperature = db.Column(db.Float, nullable=False)
+    ideal_humidity = db.Column(db.Float, nullable=False)
+    timestamp = db.Column(db.DateTime, default=func.now(), nullable=False)
