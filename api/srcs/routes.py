@@ -139,14 +139,14 @@ def fetch_order():
         prompt_user += f"{data.menus}を理想的に食べる温度は{data.ideal_temperature}度でと湿度は{data.ideal_humidity}%です。"
         prompt_user += "私はフード配達員として何をすべきですか？"
         res_data = fetch_open_ai(prompt_system, prompt_user)
-        # res_json = res_data["choices"][0]["message"]["content"]
+        res_json = res_data["choices"][0]["message"]["content"]
         # json_data = json.loads(res_json)
 
         result = {
             "menus": data.menus,
             "ideal_temperature": data.ideal_temperature,
             "ideal_humidity": data.ideal_humidity,
-            "report": res_data,
+            "report": res_json,
         }
         return jsonify(result), 200
 

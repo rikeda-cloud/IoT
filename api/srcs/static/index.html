@@ -79,8 +79,21 @@
 			}
 		}
 
+		async function fetchOrderData() {
+			try {
+				const response = await fetch('http://localhost:8080/api/order');
+				const orderData = await response.json();
+				console.log('Order Data:', orderData);  // レスポンスデータをコンソールに表示
+			} catch (error) {
+				console.error('Orderデータ取得に失敗しました:', error);
+			}
+		}
+
 		// データを取得してグラフを表示
 		fetchData();
+
+		// /orderエンドポイントからデータを取得
+		fetchOrderData();
 	</script>
 </body>
 
