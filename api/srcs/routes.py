@@ -102,3 +102,53 @@ def handle_order_assigned():
         return jsonify(res_json), 201
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/order", methods=["GET"])
+def fetch_order():
+    """オーダーのデータを取得"""
+    try:
+        data = OrderData.query.order_by(OrderData.id.desc()).first()
+
+        # データが存在しない場合
+        if not data:
+            return jsonify({"message": "注文が行われていません"}), 404
+
+        iot_data = IoTData.query.filter_by(device_id=DEVICE_ID).all()
+
+        # データが存在しない場合
+        if not iot_data:
+            return jsonify({"message": "No data found for the given device ID"}), 404
+
+        # データをリストに変換
+        iot_data_list = [
+            {
+                "temperature": d.temperature,
+                "humidity": d.humidity,
+                "timestamp": d.timestamp,
+            }
+            for d in iot_data
+        ]
+
+        prompt_system = "あなたは食品のデリバリーの専門家です。"
+        prompt_user = f"{iot_data_list}"
+        prompt_user += (
+            "このような形でフードボックス内の中身の温度と湿度の現在のデータが送られます"
+        )
+        prompt_user += f"そして私はフード配達員で{data.menus}を運んでいます。"
+        prompt_user += f"{data.menus}を理想的に食べる温度は{data.ideal_temperature}度でと湿度は{data.ideal_humidity}%です。"
+        prompt_user += "私はフード配達員として何をすべきですか？"
+        res_data = fetch_open_ai(prompt_system, prompt_user)
+        # res_json = res_data["choices"][0]["message"]["content"]
+        # json_data = json.loads(res_json)
+
+        result = {
+            "menus": data.menus,
+            "ideal_temperature": data.ideal_temperature,
+            "ideal_humidity": data.ideal_humidity,
+            "report": res_data,
+        }
+        return jsonify(result), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
