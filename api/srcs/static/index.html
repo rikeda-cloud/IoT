@@ -30,6 +30,11 @@
 	<!-- Canvas for the graph -->
 	<canvas id="myChart" width="400" height="200"></canvas>
 
+	<div id="ideal-humidty"></div>
+	<div id="ideal-temperature"></div>
+	<div id="menus"></div>
+	<div id="report"></div>
+
 	<script>
 		// 非同期関数を作成してデータをフェッチする
 		async function fetchData() {
@@ -83,6 +88,17 @@
 			try {
 				const response = await fetch('http://localhost:8080/api/order');
 				const orderData = await response.json();
+
+				const idealHumidty = document.getElementById("ideal-humidty");
+				const idealTemperature = document.getElementById("ideal-temperature");
+				const menus = document.getElementById("menus");
+				const report = document.getElementById("report");
+
+				idealHumidty.textContent = orderData.ideal_humidity;
+				idealTemperature.textContent = orderData.ideal_temperature;
+				menus.textContent = orderData.menus;
+				report.textContent = orderData.report;
+
 				console.log('Order Data:', orderData);  // レスポンスデータをコンソールに表示
 			} catch (error) {
 				console.error('Orderデータ取得に失敗しました:', error);
