@@ -57,6 +57,39 @@
 			font-weight: bold;
 			color: #007bff;
 		}
+
+		.report-container {
+			margin-top: 20px;
+			max-width: 90%;
+			text-align: left;
+		}
+
+		.report-card {
+			background: white;
+			padding: 15px;
+			border-radius: 8px;
+			box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+			max-width: 600px;
+			margin: 0 auto;
+		}
+
+		.report-card h2 {
+			font-size: 18px;
+			margin-bottom: 10px;
+			color: #333;
+		}
+
+		.report-text {
+			width: 100%;
+			height: 200px;
+			border: 1px solid #ccc;
+			border-radius: 5px;
+			padding: 10px;
+			font-size: 14px;
+			overflow-y: auto;
+			background: #f9f9f9;
+			white-space: pre-wrap;
+		}
 	</style>
 </head>
 
@@ -69,7 +102,7 @@
 	<div class="data-container">
 		<div class="data-card">
 			<h2>Ideal Humidity</h2>
-			<p id="ideal-humidty">--</p>
+			<p id="ideal-humidity">--</p>
 		</div>
 		<div class="data-card">
 			<h2>Ideal Temperature</h2>
@@ -79,9 +112,12 @@
 			<h2>Menus</h2>
 			<p id="menus">--</p>
 		</div>
-		<div class="data-card">
+	</div>
+
+	<div class="report-container">
+		<div class="report-card">
 			<h2>Report</h2>
-			<p id="report">--</p>
+			<div id="report" class="report-text">--</div>
 		</div>
 	</div>
 
@@ -139,15 +175,10 @@
 				const response = await fetch('http://localhost:8080/api/order');
 				const orderData = await response.json();
 
-				const idealHumidty = document.getElementById("ideal-humidty");
-				const idealTemperature = document.getElementById("ideal-temperature");
-				const menus = document.getElementById("menus");
-				const report = document.getElementById("report");
-
-				idealHumidty.textContent = orderData.ideal_humidity;
-				idealTemperature.textContent = orderData.ideal_temperature;
-				menus.textContent = orderData.menus;
-				report.textContent = orderData.report;
+				document.getElementById("ideal-humidity").textContent = orderData.ideal_humidity + " %";
+				document.getElementById("ideal-temperature").textContent = orderData.ideal_temperature + " ℃";
+				document.getElementById("menus").textContent = orderData.menus;
+				document.getElementById("report").textContent = orderData.report;
 
 				console.log('Order Data:', orderData);  // レスポンスデータをコンソールに表示
 			} catch (error) {
