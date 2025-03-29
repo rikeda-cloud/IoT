@@ -1,95 +1,87 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Humidity and Temperature Graph</title>
-  
-  <!-- Chart.js CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Humidity and Temperature Graph</title>
 
-  <!-- Optional: Add some basic styling -->
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      margin-top: 20px;
-    }
-    canvas {
-      max-width: 90%;
-      margin: 20px auto;
-    }
-  </style>
+	<!-- Chart.js CDN -->
+	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+	<!-- Optional: Add some basic styling -->
+	<style>
+		body {
+			font-family: Arial, sans-serif;
+			text-align: center;
+			margin-top: 20px;
+		}
+
+		canvas {
+			max-width: 90%;
+			margin: 20px auto;
+		}
+	</style>
 </head>
+
 <body>
-  <h1>Humidity and Temperature over Time</h1>
-  
-  <!-- Canvas for the graph -->
-  <canvas id="myChart" width="400" height="200"></canvas>
-  
-  <script>
-    // 取得したAPIデータ (例としてそのまま書きますが、実際にはAPIから取得する)
-    const data = [
-      {"humidity":44.96,"temperature":21.28,"timestamp":"Sat, 29 Mar 2025 04:27:55 GMT"},
-      {"humidity":44.99,"temperature":21.26,"timestamp":"Sat, 29 Mar 2025 04:27:59 GMT"},
-      {"humidity":44.89,"temperature":21.24,"timestamp":"Sat, 29 Mar 2025 04:28:03 GMT"},
-      {"humidity":44.84,"temperature":21.25,"timestamp":"Sat, 29 Mar 2025 04:28:07 GMT"},
-      {"humidity":44.8,"temperature":21.26,"timestamp":"Sat, 29 Mar 2025 04:28:11 GMT"},
-      {"humidity":44.74,"temperature":21.25,"timestamp":"Sat, 29 Mar 2025 04:28:15 GMT"},
-      {"humidity":44.66,"temperature":21.2,"timestamp":"Sat, 29 Mar 2025 04:28:28 GMT"},
-      {"humidity":44.59,"temperature":21.19,"timestamp":"Sat, 29 Mar 2025 04:28:28 GMT"},
-      {"humidity":44.58,"temperature":21.2,"timestamp":"Sat, 29 Mar 2025 04:28:28 GMT"},
-      {"humidity":44.56,"temperature":21.18,"timestamp":"Sat, 29 Mar 2025 04:28:31 GMT"},
-      {"humidity":44.57,"temperature":21.19,"timestamp":"Sat, 29 Mar 2025 04:28:35 GMT"},
-      {"humidity":44.51,"temperature":21.17,"timestamp":"Sat, 29 Mar 2025 04:28:39 GMT"},
-      {"humidity":44.46,"temperature":21.17,"timestamp":"Sat, 29 Mar 2025 04:28:43 GMT"},
-      {"humidity":44.49,"temperature":21.19,"timestamp":"Sat, 29 Mar 2025 04:28:47 GMT"},
-      {"humidity":44.44,"temperature":21.16,"timestamp":"Sat, 29 Mar 2025 04:28:52 GMT"},
-      {"humidity":44.39,"temperature":21.19,"timestamp":"Sat, 29 Mar 2025 04:28:56 GMT"},
-      {"humidity":44.36,"temperature":21.18,"timestamp":"Sat, 29 Mar 2025 04:29:00 GMT"},
-      {"humidity":44.44,"temperature":21.15,"timestamp":"Sat, 29 Mar 2025 04:29:04 GMT"},
-      {"humidity":44.54,"temperature":21.19,"timestamp":"Sat, 29 Mar 2025 04:29:08 GMT"},
-      {"humidity":44.48,"temperature":21.18,"timestamp":"Sat, 29 Mar 2025 04:29:12 GMT"},
-      {"humidity":44.45,"temperature":21.18,"timestamp":"Sat, 29 Mar 2025 04:29:16 GMT"}
-    ];
+	<h1>Humidity and Temperature over Time</h1>
 
-    // timestampsをdate形式に変換して、必要なデータを抽出
-    const timestamps = data.map(item => new Date(item.timestamp).toLocaleTimeString());
-    const humidityData = data.map(item => item.humidity);
-    const temperatureData = data.map(item => item.temperature);
+	<!-- Canvas for the graph -->
+	<canvas id="myChart" width="400" height="200"></canvas>
 
-    // グラフの作成
-    const ctx = document.getElementById('myChart').getContext('2d');
-    const myChart = new Chart(ctx, {
-      type: 'line',  // ラインチャート
-      data: {
-        labels: timestamps,  // 横軸：時間
-        datasets: [
-          {
-            label: 'Humidity (%)',  // 湿度
-            data: humidityData,  // 湿度データ
-            borderColor: 'rgba(75, 192, 192, 1)',  // 湿度のラインカラー
-            fill: false,  // 塗りつぶしなし
-            tension: 0.1  // 曲線の滑らかさ
-          },
-          {
-            label: 'Temperature (°C)',  // 温度
-            data: temperatureData,  // 温度データ
-            borderColor: 'rgba(255, 99, 132, 1)',  // 温度のラインカラー
-            fill: false,  // 塗りつぶしなし
-            tension: 0.1  // 曲線の滑らかさ
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        scales: {
-          y: {
-            beginAtZero: false
-          }
-        }
-      }
-    });
-  </script>
+	<script>
+		// 非同期関数を作成してデータをフェッチする
+		async function fetchData() {
+			try {
+				const response = await fetch('http://localhost:8080/api/iot-data');
+				const data = await response.json();
+
+				// timestampsをdate形式に変換して、必要なデータを抽出
+				const timestamps = data.map(item => new Date(item.timestamp).toLocaleTimeString());
+				const humidityData = data.map(item => item.humidity);
+				const temperatureData = data.map(item => item.temperature);
+
+				// グラフの作成
+				const ctx = document.getElementById('myChart').getContext('2d');
+				const myChart = new Chart(ctx, {
+					type: 'line',  // ラインチャート
+					data: {
+						labels: timestamps,  // 横軸：時間
+						datasets: [
+							{
+								label: 'Humidity (%)',  // 湿度
+								data: humidityData,  // 湿度データ
+								borderColor: 'rgba(75, 192, 192, 1)',  // 湿度のラインカラー
+								fill: false,  // 塗りつぶしなし
+								tension: 0.1  // 曲線の滑らかさ
+							},
+							{
+								label: 'Temperature (°C)',  // 温度
+								data: temperatureData,  // 温度データ
+								borderColor: 'rgba(255, 99, 132, 1)',  // 温度のラインカラー
+								fill: false,  // 塗りつぶしなし
+								tension: 0.1  // 曲線の滑らかさ
+							}
+						]
+					},
+					options: {
+						responsive: true,
+						scales: {
+							y: {
+								beginAtZero: false
+							}
+						}
+					}
+				});
+			} catch (error) {
+				console.error('データ取得に失敗しました:', error);
+			}
+		}
+
+		// データを取得してグラフを表示
+		fetchData();
+	</script>
 </body>
+
 </html>
