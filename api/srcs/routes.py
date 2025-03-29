@@ -9,6 +9,12 @@ import json
 DEVICE_ID = 1
 
 
+@app.route("/")
+def index():
+    # index.htmlを静的に提供
+    return app.send_static_file("index.html")
+
+
 @app.route("/api/iot-data", methods=["POST"])
 def add_iot_data():
     """IoTデバイスから温度・湿度データを受け取りDBに保存"""

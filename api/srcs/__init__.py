@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 import os
 
 # アプリケーションの初期化
-app = Flask(__name__)
+app = Flask(__name__, static_folder="/app/app/static")
 
 # データベースの設定
 DATABASE_URI = "sqlite:///db.sqlite3"
